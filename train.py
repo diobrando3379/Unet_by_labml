@@ -5,14 +5,14 @@ import torch.nn as nn
 from torch.utils.data import DataLoader # 数据加载器
 from torch.optim.lr_scheduler import ReduceLROnPlateau # 学习率调度器
 from torch.optim import Adam # 优化器
-import torch.nn.functional as F # 用于计算损失函数
-import torchvision.utils as vutils # 用于可视化
-import math
+from torchvision import utils as vutils # 可视化工具
+
 from pathlib import Path
 from tqdm import tqdm
 
 from utils.ISTD import ISTDDataset
 from unet import UNet
+from utils.metrics import calculate_psnr, calculate_ssim
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -83,44 +83,6 @@ criterion = criterion.to(device)
 optimizer = Adam(model.parameters(), lr=learning_rate)
 # 定义学习率调度器
 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10)
-# ----------------------------------------------------------------------------
-def calculate_psnr(img1, img2, max_val=1.0):
-    """计算PSNR值"""
-    mse = torch.mean((img1 - img2) ** 2)
-    if mse == 0:
-        return float('inf')
-    psnr = 20 * math.log10(max_val / math.sqrt(mse))
-    return psnr
-
-def calculate_ssim(img1, img2, window_size=11, sigma=1.5):
-    """计算SSIM值"""
-    # 创建高斯窗口
-    def gaussian_window(size, sigma):
-        coords = torch.arange(size, dtype=torch.float32) - size // 2
-        g = torch.exp(-(coords ** 2) / (2 * sigma ** 2))
-        g = g / g.sum()
-        return g.view(1, 1, 1, size) * g.view(1, 1, size, 1)
-    
-    window = gaussian_window(window_size, sigma).to(img1.device)
-    window = window.expand(img1.size(1), 1, window_size, window_size)
-    
-    mu1 = F.conv2d(img1, window, padding=window_size//2, groups=img1.size(1))
-    mu2 = F.conv2d(img2, window, padding=window_size//2, groups=img2.size(1))
-    
-    mu1_sq = mu1 ** 2
-    mu2_sq = mu2 ** 2
-    mu1_mu2 = mu1 * mu2
-    
-    sigma1_sq = F.conv2d(img1 * img1, window, padding=window_size//2, groups=img1.size(1)) - mu1_sq
-    sigma2_sq = F.conv2d(img2 * img2, window, padding=window_size//2, groups=img2.size(1)) - mu2_sq
-    sigma12 = F.conv2d(img1 * img2, window, padding=window_size//2, groups=img1.size(1)) - mu1_mu2
-    
-    C1 = 0.01 ** 2
-    C2 = 0.03 ** 2
-    
-    ssim = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / ((mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2))
-    return ssim.mean()
-
 # ----------------------------------------------------------------------------
 total_train_step = 0
 total_test_step = 0
