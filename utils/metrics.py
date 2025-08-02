@@ -12,15 +12,15 @@ def calculate_psnr(img1, img2, max_val=1.0):
     psnr = 20 * math.log10(max_val / math.sqrt(mse))
     return psnr
 
+def gaussian_window(size, sigma):
+    """创建高斯窗口"""
+    coords = torch.arange(size, dtype=torch.float32) - size // 2
+    g = torch.exp(-(coords ** 2) / (2 * sigma ** 2))
+    g = g / g.sum()
+    return g.view(1, 1, 1, size) * g.view(1, 1, size, 1)
+
 def calculate_ssim(img1, img2, window_size=11, sigma=1.5, max_val=1.0):
     """计算SSIM值"""
-    # 创建高斯窗口
-    def gaussian_window(size, sigma):
-        coords = torch.arange(size, dtype=torch.float32) - size // 2
-        g = torch.exp(-(coords ** 2) / (2 * sigma ** 2))
-        g = g / g.sum()
-        return g.view(1, 1, 1, size) * g.view(1, 1, size, 1)
-    
     window = gaussian_window(window_size, sigma).to(img1.device)
     window = window.expand(img1.size(1), 1, window_size, window_size)
     

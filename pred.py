@@ -59,16 +59,13 @@ with torch.no_grad():
         outputs = outputs.cpu().clamp(0, 1) * 255.0
         targets = targets.cpu().clamp(0, 1) * 255.0
 
-        # 保存图像
         # 转换为numpy数组并调整维度 [C, H, W] -> [H, W, C]
         output_img = outputs.squeeze(0).permute(1, 2, 0).numpy().astype(np.uint8)
         target_img = targets.squeeze(0).permute(1, 2, 0).numpy().astype(np.uint8)
-        
-        # 转换为PIL图像并保存
+
         output_pil = Image.fromarray(output_img)
         target_pil = Image.fromarray(target_img)
-        
-        # 保存文件，文件名格式：test_001.png
+
         output_filename = f"pred_{i+1:03d}.png"
         target_filename = f"label_{i+1:03d}.png"
         
