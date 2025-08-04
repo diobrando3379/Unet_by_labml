@@ -28,11 +28,11 @@ mask_Path = Path('/home/Data_Pool/qianlf/ISTD_Dataset/test/test_B')
 label_Path = Path('/home/Data_Pool/qianlf/ISTD_Dataset/test/test_C')
 # ----------------------------------------------------------------------------
 # 设置GPU编号
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 # ----------------------------------------------------------------------------
 # 加载模型及训练权重
 model = UNet(in_channels=4, out_channels=3)
-checkpoint = torch.load('./checkpoints/best_model_final.pth', map_location=device)
+checkpoint = torch.load('./checkpoints/best_model.pth', map_location=device)
 model.load_state_dict(checkpoint)
 model.to(device)
 model.eval()
