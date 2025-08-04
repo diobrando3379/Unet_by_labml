@@ -25,7 +25,7 @@ mask_Path = Path('/home/Data_Pool/qianlf/ISTD_Dataset/train/train_B')
 label_Path = Path('/home/Data_Pool/qianlf/ISTD_Dataset/train/train_C')
 # ----------------------------------------------------------------------------
 # 设置GPU编号
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 # ----------------------------------------------------------------------------
 # 超参数
 batch_size = 20
@@ -113,8 +113,8 @@ for i in range(epochs):
 
         total_train_step += 1
 
-        if total_train_step % 100 == 0:
-            print(f"训练次数:{total_train_step}, loss:{loss.item()}")
+        # if total_train_step % 100 == 0:
+        #     print(f"训练次数:{total_train_step}, loss:{loss.item()}")
 
     # 评估开始
     model.eval() # 评估模式
